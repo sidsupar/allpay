@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int           @id @default(autoincrement())
+  firstname   String?
+  lastname    String?
+  email       String?       @unique
+  phone       String        @unique
+  password    String
+  balance     Balances[]
+  transaction Transaction[]
+}
+
+model Balances {
+  id     Int  @id @default(autoincrement())
+  amount Int
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+}
+
+model Transaction {
+  id             Int          @id @default(autoincrement())
+  amount         Int
+  status         onRampStatus
+  token          String       @unique
+  startTime      DateTime
+  completionTime DateTime?
+  provider       String?
+  userId         Int
+  userTo         Int?
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum onRampStatus {
+  processing
+  sent
+  failed
+}
+
+enum AuthType {
+  Google
+  Github
+}
